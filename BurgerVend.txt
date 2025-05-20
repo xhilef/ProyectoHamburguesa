@@ -1,0 +1,2539 @@
+App.java
+package burgervend;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.jar.JarFile;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class App extends Application {
+    
+    @Override
+    public void start(Stage primaryStage) {
+        try {
+            // Llamada a la función para imprimir los contenidos del JAR
+            printJarContents();
+            
+            URL fxmlUrl = getClass().getResource("/burgervend/views/MainView.fxml");
+            if (fxmlUrl == null) {
+                throw new IOException("¡No se encontró MainView.fxml!");
+            }
+            Parent root = FXMLLoader.load(fxmlUrl);
+            
+            Scene scene = new Scene(root, 800, 600);
+            
+            URL mainCss = getClass().getResource("/burgervend/css/main.css");
+            if (mainCss != null) scene.getStylesheets().add(mainCss.toExternalForm());
+            else System.err.println("main.css no encontrado");
+
+            URL compCss = getClass().getClassLoader().getResource("burgervend/css/componentes.css");
+            if (compCss != null) {
+                scene.getStylesheets().add(compCss.toExternalForm());
+            } else {
+                System.err.println("components.css no encontrado");
+            }
+
+           
+            primaryStage.setTitle("BurgerVend");
+            primaryStage.setScene(scene);
+            primaryStage.show();
+            
+            burgervend.utils.ScreenManager.setPrimaryStage(primaryStage);
+            
+        } catch (Exception e) {
+            System.err.println("Error crítico: " + e.getMessage());
+            e.printStackTrace();
+            mostrarAlertaError(e);
+        }
+    }
+    
+    private void mostrarAlertaError(Exception e) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle("Error de Inicio");
+        alert.setHeaderText("No se pudo iniciar la aplicación");
+        alert.setContentText("Detalle: " + e.getMessage());
+        alert.showAndWait();
+    }
+
+    // Función para imprimir los contenidos del JAR
+    public static void printJarContents() {
+    ClassLoader classLoader = App.class.getClassLoader();
+    URL jarUrl = classLoader.getResource("burgervend/css/");
+    
+    if (jarUrl != null) {
+        System.out.println("Ruta al directorio: " + jarUrl);
+        try {
+            // Usamos JarFile para leer los contenidos del JAR
+            String jarPath = jarUrl.toString().replaceFirst("jar:file:", "").replaceAll("!.*$", "");
+            JarFile jarFile = new JarFile(jarPath);
+            
+            // Iteramos a través de los archivos en el JAR
+            jarFile.stream()
+                   .filter(entry -> entry.getName().startsWith("burgervend/css/"))  // Filtramos para solo ver los archivos dentro de esa carpeta
+                   .forEach(entry -> System.out.println("Archivo en el JAR: " + entry.getName()));
+            
+            jarFile.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    } else {
+        System.err.println("No se encuentra la carpeta de recursos.");
+    }
+}
+}
+
+MainView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="20" stylesheets="@/burgervend/css/main.css" xmlns="http://javafx.com/javafx/8.0.202" xmlns:fx="http://javafx.com/fxml/1" fx:controller="burgervend.controllers.MainController">
+   <Label prefHeight="35.0" prefWidth="198.0" text="Bienvenido a" textFill="#0d7238">
+      <font>
+         <Font size="29.0" />
+      </font>
+   </Label>
+    
+    <ImageView fitHeight="350" fitWidth="500" preserveRatio="true">
+        <image>
+            <Image url="@/burgervend/imagenes/ui/header_logo.png" />
+        </image>
+    </ImageView>
+
+    <Button fx:id="btnStart" styleClass="main-button" text="INICIAR PEDIDO" textFill="LIME" />
+</VBox>
+
+SelevtionView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox stylesheets="@/burgervend/css/main.css" xmlns="http://javafx.com/javafx/8.0.202" xmlns:fx="http://javafx.com/fxml/1" fx:controller="burgervend.controllers.SelectionController">
+
+    <Label styleClass="title" text="SELECCIONA TU HAMBURGUESA" textFill="#008000" />
+    
+    <ListView fx:id="listHamburguesas">
+        
+    </ListView>
+
+    
+    <Button fx:id="btnStart" onAction="#onPersonalizarClick" styleClass="main-button" text="PERSONALIZAR" />
+</VBox>
+
+CustomizationView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox stylesheets="@/burgervend/css/main.css"
+      xmlns="http://javafx.com/javafx/8.0.202"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="burgervend.controllers.CustomizationController"
+      spacing="10" alignment="TOP_CENTER" prefWidth="600" prefHeight="700">
+
+    <Label styleClass="title" text="PERSONALIZA TU HAMBURGUESA" textFill="#008000" />
+
+    <ImageView fx:id="hamburguesaImage" fitWidth="300" fitHeight="300" />
+
+    <ListView fx:id="listIngredientes" prefHeight="400" />
+
+    <Label fx:id="lblTotal" styleClass="total-label" text="Total: $0.00" />
+
+    <Button text="CONFIRMAR" fx:id="btnConfirmar" onAction="#onConfirmarClick" styleClass="confirm-button" />
+
+</VBox>
+
+DeliveryView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="burgervend.controllers.DeliveryController"
+      spacing="20" alignment="CENTER"
+      minWidth="600" minHeight="400"
+      styleClass="delivery-container">
+
+    <!-- Imagen de éxito -->
+    <ImageView fx:id="imgSuccess" fitWidth="2" fitHeight="100" preserveRatio="true">
+        <image>
+            <Image url="burgervend/imagenes/ui/success.png"/>
+        </image>
+    </ImageView>
+    
+    <!-- Título -->
+    <Label text="¡PEDIDO COMPLETADO!" styleClass="success-title"/>
+    
+    <!-- Detalles del pedido -->
+    <Label fx:id="lblOrderDetails" wrapText="true" styleClass="order-details"/>
+    
+    <!-- Botón de volver al inicio -->
+    <Button text="VOLVER AL INICIO" onAction="#onVolverInicioClick" styleClass="main-button"/>
+</VBox>
+
+PaymentView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="burgervend.controllers.PaymentController"
+      spacing="20"
+      alignment="TOP_CENTER"
+      prefWidth="400" prefHeight="500"
+      style="-fx-background-color: #f93700;"
+      styleClass="payment-container">
+
+
+    <!-- Título -->
+    <Label text="MÉTODO DE PAGO" styleClass="section-title"/>
+
+    <!-- Contenedor dinámico de métodos de pago -->
+    <VBox fx:id="paymentMethodsContainer" spacing="10" />
+
+    <!-- Campos de tarjeta (visibilidad controlada desde el controlador) -->
+    <HBox spacing="10" fx:id="tarjetaBox" visible="false" alignment="CENTER_LEFT">
+        <Label text="Número de Tarjeta:"/>
+        <TextField fx:id="txtNumeroTarjeta" promptText="Ingrese número de tarjeta"/>
+    </HBox>
+
+    <HBox spacing="40" fx:id="cvvBox" visible="false" alignment="CENTER_LEFT">
+        <Label text="CVV:"/>
+        <TextField fx:id="txtCvv" promptText="Ingrese CVV"/>
+    </HBox>
+
+    <!-- Monto total -->
+    <Label fx:id="lblAmount" styleClass="amount-label"/>
+
+    <!-- Resumen del pedido -->
+    <Label fx:id="lblResumen" wrapText="true" />
+
+    <!-- Botón de pagar -->
+    <Button text="PAGAR" onAction="#onPagarClick" styleClass="pay-button"/>
+</VBox>
+
+ResumenView
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" 
+     fx:controller="burgervend.controllers.ResumenController" spacing="20" styleClass="summary-container">
+     
+    <Label text="Total de tu pedido" styleClass="section-title"/>
+    
+    <Label fx:id="lblResumen" styleClass="summary-details"/>
+    
+    <Label fx:id="lblPrecioTotal" styleClass="total-price"/>
+    
+    <HBox spacing="10">
+    <Button text="Cancelar" onAction="#onCancelarClick" styleClass="cancel-button"/>
+    <Button text="Confirmar" onAction="#onConfirmarClick" styleClass="confirm-button"/>
+    </HBox>
+
+    
+</VBox>
+
+PagoView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" 
+     fx:controller="burgervend.controllers.PagoController" spacing="20" styleClass="payment-container">
+     
+    <Label text="MÉTODO DE PAGO" styleClass="section-title"/>
+    
+    <VBox fx:id="paymentMethodsContainer" spacing="10">
+       
+    </VBox>
+    
+    <Label fx:id="lblAmount" styleClass="amount-label" />
+    
+    <Button text="PAGAR" onAction="#onPagarClick" styleClass="pay-button"/>
+</VBox>
+
+ExitoView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="burgervend.controllers.ExitoController">
+    <children>
+        <VBox spacing="15.0" alignment="CENTER" AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+            <Label text="¡Pago exitoso!" style="-fx-font-size: 24px; -fx-text-fill: green;" />
+            <Label text="Gracias por tu compra. Tu hamburguesa estará lista pronto." wrapText="true" maxWidth="400"/>
+            <Button text="Volver al inicio" onAction="#onVolverClick"/>
+        </VBox>
+    </children>
+</AnchorPane>
+
+ErrorView
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="burgervend.controllers.ErrorPagoController">
+    <children>
+        <VBox spacing="15.0" alignment="CENTER" AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+            <Label text="¡Error en el pago!" style="-fx-font-size: 24px; -fx-text-fill: red;"/>
+            <Label text="Ocurrió un problema al procesar tu pago. Intenta nuevamente o usa otro método." wrapText="true" maxWidth="400"/>
+            <Button text="Volver" onAction="#onVolverClick"/>
+        </VBox>
+    </children>
+</AnchorPane>
+
+
+package burgervend.controllers;
+
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+
+public class MainController {
+    @FXML private Button btnStart;
+
+    @FXML
+    private void initialize() {
+        btnStart.setOnAction(e -> {
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("/burgervend/views/SelectionView.fxml"));
+                Stage stage = (Stage) btnStart.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+    }
+}
+
+package burgervend.controllers;
+
+import burgervend.models.Hamburguesa;
+import burgervend.services.GestorPedidos;
+import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
+import burgervend.utils.ScreenManager;
+import burgervend.controllers.BurgerCellFactory;
+import burgervend.utils.AppState;
+
+public class SelectionController {
+    @FXML private ListView<Hamburguesa> listHamburguesas;
+    private final GestorPedidos gestorPedidos = new GestorPedidos();
+    
+    @FXML
+    private void initialize() {
+        // Cargar las hamburguesas base en la lista
+        listHamburguesas.getItems().addAll(gestorPedidos.getHamburguesasBase());
+
+        // Asignar la fábrica de celdas personalizada
+        listHamburguesas.setCellFactory(BurgerCellFactory.create());
+    }
+    
+    @FXML
+    private void onPersonalizarClick(javafx.event.ActionEvent event) {
+        // Obtener la hamburguesa seleccionada
+        Hamburguesa seleccionada = listHamburguesas.getSelectionModel().getSelectedItem();
+        
+        // Verifica si hay una hamburguesa seleccionada
+        if (seleccionada != null) {
+            // cargar la pantalla de personalización y pasar la hamburguesa seleccionada
+            ScreenManager.loadCustomizationScreen(seleccionada);
+        }
+    }
+}
+
+package burgervend.controllers;
+
+import burgervend.models.Hamburguesa;
+import burgervend.models.Pedido;
+import burgervend.models.ingredientes.Ingrediente;
+import burgervend.services.GestorIngredientes;
+import burgervend.services.MotorPersonalizacion;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.util.Callback;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import javafx.scene.layout.HBox;
+import java.util.List;
+import burgervend.utils.ScreenManager;
+
+
+public class CustomizationController {
+
+    @FXML private ImageView hamburguesaImage;
+    @FXML private ListView<Ingrediente> listIngredientes;
+    @FXML private Label lblTotal;
+
+    private final MotorPersonalizacion motor;
+    private Pedido pedidoActual;
+    private Hamburguesa hamburguesaBase;
+
+    public CustomizationController() {
+        this.motor = new MotorPersonalizacion(new GestorIngredientes());
+    }
+
+    public void setHamburguesa(Hamburguesa hamburguesa) {
+        this.hamburguesaBase = hamburguesa;
+        this.pedidoActual = new Pedido(hamburguesa, new ArrayList<>());
+        cargarImagenHamburguesa();
+        cargarIngredientesDisponibles();
+        actualizarTotal();
+    }
+
+    private void cargarImagenHamburguesa() {
+        String nombreArchivo = hamburguesaBase.getNombre().toLowerCase() + ".png";
+        String path = "/burgervend/imagenes/hamburguesas/" + nombreArchivo;
+
+        try (InputStream stream = getClass().getResourceAsStream(path)) {
+            if (stream != null) {
+                Image img = new Image(stream);
+                hamburguesaImage.setImage(img);
+            } else {
+                System.err.println("No se encontró la imagen: " + path);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al cargar la imagen: " + e.getMessage());
+        }
+    }
+
+    private void cargarIngredientesDisponibles() {
+        listIngredientes.setCellFactory(param -> new ListCell<Ingrediente>()   {
+            private final Spinner<Integer> spinner = new Spinner<>(0, 5, 0);
+            private final Label nombre = new Label();
+            private final Label precio = new Label();
+            private final HBox layout = new HBox(10, nombre, precio, spinner);
+
+            {
+                spinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+                    Ingrediente ing = getItem();
+                    if (ing != null) {
+                        if (newValue > 0) {
+                            pedidoActual.agregarIngrediente(ing, newValue);
+                        } else {
+                            pedidoActual.removerIngrediente(ing);
+                        }
+                        actualizarTotal();
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Ingrediente item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    nombre.setText(item.getNombre());
+                    precio.setText(String.format("$%.2f", item.getPrecio()));
+                    spinner.getValueFactory().setValue(
+                        pedidoActual.getCantidadIngrediente(item)
+                    );
+                    setGraphic(layout);
+                }
+            }
+        });
+
+        listIngredientes.getItems().setAll(motor.getOpcionesPersonalizacion());
+    }
+
+    private void actualizarTotal() {
+        lblTotal.setText(String.format("Total: $%.2f", pedidoActual.calcularTotal()));
+    }
+
+    @FXML
+    private void onConfirmarClick() {
+        List<Ingrediente> ingredientesList = new ArrayList<>(pedidoActual.getIngredientes().keySet());
+
+    if (motor.validarCombinacion(ingredientesList)) {
+        ScreenManager.loadScreen("Resumen", pedidoActual);  // Ir a ResumenView.fxml
+    } else {
+        mostrarAlerta("Error", "Combinación inválida de ingredientes.");
+    }
+}
+
+
+
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+}
+
+package burgervend.controllers;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import burgervend.models.Hamburguesa;
+import burgervend.utils.ScreenManager;
+
+public class DeliveryController {
+    @FXML private Label lblOrderDetails;
+
+    private Hamburguesa hamburguesa;
+
+    public void setHamburguesa(Hamburguesa hamburguesa) {
+        this.hamburguesa = hamburguesa;
+
+        if (lblOrderDetails != null && hamburguesa != null) {
+            mostrarDetalles();
+        }
+    }
+
+    @FXML
+    private void initialize() {
+        if (hamburguesa != null) {
+            mostrarDetalles();
+        }
+    }
+
+    private void mostrarDetalles() {
+        String detalles = hamburguesa.getNombre() + "\n" +
+                "Ingredientes:\n";
+
+        detalles += hamburguesa.getIngredientes().isEmpty()
+                ? "- (ninguno)\n"
+                : hamburguesa.getIngredientes().stream()
+                    .map(i -> "- " + i.getNombre())
+                    .reduce("", (a, b) -> a + b + "\n");
+
+        detalles += "Total: $" + String.format("%.2f", hamburguesa.getPrecioTotal());
+
+        lblOrderDetails.setText(detalles);
+    }
+
+    @FXML
+    private void onVolverInicioClick() {
+        ScreenManager.loadScreen("main");
+    }
+}
+
+package burgervend.controllers;
+
+import burgervend.models.Hamburguesa;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
+import javafx.util.Callback;
+
+import java.io.InputStream;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
+
+public class BurgerCellFactory implements Callback<ListView<Hamburguesa>, ListCell<Hamburguesa>> {
+
+    @Override
+    public ListCell<Hamburguesa> call(ListView<Hamburguesa> listView) {
+        return new ListCell<Hamburguesa>() {
+            private final HBox content = new HBox(10);
+            private final ImageView imageView = new ImageView();
+            private final Text text = new Text();
+
+            {
+                imageView.setFitWidth(90); 
+                imageView.setFitHeight(90);
+                imageView.setPreserveRatio(true);
+                content.getChildren().addAll(imageView, text);
+            }
+
+            @Override
+            protected void updateItem(Hamburguesa item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    try {
+                        // Sanitiza el nombre de la hamburguesa para la ruta del archivo
+                        String sanitizedName = sanitizeFileName(item.getNombre());
+                        String imagePath = "/burgervend/imagenes/hamburguesas/" + sanitizedName + ".png";
+                        System.out.println("Image path: " + imagePath);
+
+                        // Intentar cargar la imagen desde el JAR
+                        InputStream imageStream = getClass().getResourceAsStream(imagePath);
+                        if (imageStream != null) {
+                            imageView.setImage(new Image(imageStream));
+                        } else {
+                            throw new Exception("Image not found: " + imagePath);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error loading image: " + e.getMessage());
+
+                        // Imagen por defecto si ocurre un error
+                        String defaultPath = "/burgervend/imagenes/ui/default_burger.png";
+                        InputStream defaultStream = getClass().getResourceAsStream(defaultPath);
+                        if (defaultStream != null) {
+                            System.out.println("Default image path: " + defaultPath);
+                            imageView.setImage(new Image(defaultStream));
+                        } else {
+                            System.out.println("ERROR: Imagen por defecto no encontrada.");
+                        }
+                    }
+
+                    // Configurar el texto con el nombre y el precio
+                    text.setText(item.getNombre() + " - $" + String.format("%.2f", item.getPrecioTotal()));
+                    setGraphic(content);
+                }
+            }
+        };
+    }
+
+    // Método de fábrica para crear la instancia
+    public static Callback<ListView<Hamburguesa>, ListCell<Hamburguesa>> create() {
+        return new BurgerCellFactory();
+    }
+
+    // Método para quitar acentos y normalizar nombres de archivo
+    private String sanitizeFileName(String nombre) {
+        String normalized = Normalizer.normalize(nombre.toLowerCase(), Normalizer.Form.NFD);
+        return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("");
+    }
+}
+
+package burgervend.controllers;
+
+import burgervend.models.Pedido;
+import burgervend.utils.ScreenManager;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+
+public class ResumenController {
+    @FXML private Label lblResumen;
+    @FXML private Label lblPrecioTotal;
+
+    private Pedido pedido;
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+        lblResumen.setText(pedido.generarResumenPago());
+        lblPrecioTotal.setText(String.format("Total: $%.2f", pedido.calcularTotal()));
+    }
+
+    @FXML
+    private void onConfirmarClick() {
+        if (pedido != null) {
+            ScreenManager.loadScreen("Payment", pedido);
+        }
+    }
+
+    @FXML
+    private void onCancelarClick() {
+        ScreenManager.loadScreen("Main");
+    }
+}
+
+
+package burgervend.controllers;
+
+import burgervend.models.Pedido;
+import burgervend.services.PagoService;
+import burgervend.services.PedidoRepository;
+import burgervend.utils.ScreenManager;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
+import java.util.List;  // Importa la clase List para utilizarla correctamente.
+
+public class PaymentController {
+
+    @FXML private VBox paymentMethodsContainer;
+    @FXML private Label lblAmount;
+    @FXML private Label lblResumen;
+    @FXML private TextField txtNumeroTarjeta;
+    @FXML private TextField txtCvv;
+    @FXML private HBox tarjetaBox;
+    @FXML private HBox cvvBox;
+
+    private final ToggleGroup toggleGroup = new ToggleGroup();
+    private final PagoService pagoService = new PagoService();
+    private Pedido pedido;
+
+    @FXML
+    private void initialize() {
+        cargarMetodosDePago();
+
+        if (tarjetaBox != null) tarjetaBox.setVisible(false);
+        if (cvvBox != null) cvvBox.setVisible(false);
+
+        toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
+            if (newToggle != null) {
+                String metodo = ((RadioButton) newToggle).getText().toLowerCase();
+                boolean esTarjeta = metodo.contains("tarjeta");
+
+                if (tarjetaBox != null) tarjetaBox.setVisible(esTarjeta);
+                if (cvvBox != null) cvvBox.setVisible(esTarjeta);
+            }
+        });
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+        lblAmount.setText(String.format("Total: $%.2f", pedido.calcularTotal()));
+        lblResumen.setText(pedido.generarResumen());
+    }
+
+    // Aquí se reemplaza la implementación de cargarMetodosDePago()
+    private void cargarMetodosDePago() {
+        paymentMethodsContainer.getChildren().clear();
+        // Asumiendo que getMetodosPago() devuelve una lista de String
+        List<String> metodos = pagoService.getMetodosPago();
+        if (metodos.isEmpty()) {
+            mostrarAlerta("Error", "No hay métodos de pago disponibles.");
+            return;
+        }
+        
+        for (String metodo : metodos) {
+            RadioButton rb = new RadioButton(metodo);
+            rb.setToggleGroup(toggleGroup);
+            paymentMethodsContainer.getChildren().add(rb);
+        }
+    }
+
+    @FXML
+    private void onPagarClick() {
+        RadioButton selected = (RadioButton) toggleGroup.getSelectedToggle();
+
+        if (selected == null) {
+            mostrarAlerta("Error", "Selecciona un método de pago.");
+            return;
+        }
+
+        String metodoPago = selected.getText();
+        boolean esTarjeta = metodoPago.toLowerCase().contains("tarjeta");
+
+        if (pedido == null) {
+            mostrarAlerta("Error", "No se ha encontrado un pedido válido.");
+            return;
+        }
+
+        if (esTarjeta) {
+            String numero = txtNumeroTarjeta.getText();
+            String cvv = txtCvv.getText();
+            if (numero.isEmpty() || cvv.isEmpty()) {
+                mostrarAlerta("Error", "Por favor ingresa número de tarjeta y CVV.");
+                return;
+            }
+        }
+
+        if (pagoService == null) {
+            mostrarAlerta("Error", "El servicio de pago no está disponible.");
+            return;
+        }
+
+        boolean pagoExitoso = pagoService.procesarPago(pedido.calcularTotal(), metodoPago);
+
+        if (pagoExitoso) {
+            pedido.aprobarPago(metodoPago);
+
+            // GUARDAR PEDIDO
+            String id = PedidoRepository.guardarPedido(pedido);
+            if (id != null) {
+                mostrarMensajeExito(id);
+            } else {
+                mostrarAlerta("Error", "No se pudo guardar el pedido.");
+            }
+
+        } else {
+            ScreenManager.loadScreen("ErrorPago");
+        }
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    private void mostrarMensajeExito(String id) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Pedido Confirmado");
+        alert.setHeaderText("¡Pago exitoso!");
+        alert.setContentText("Tu pedido ha sido registrado con el ID #" + id);
+        alert.showAndWait();
+
+        ScreenManager.loadScreen("Main");  // Puedes cambiar a otra vista si lo prefieres
+    }
+}
+
+package burgervend.controllers;
+
+import burgervend.models.ingredientes.Ingrediente;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.util.Callback;
+
+import java.io.InputStream;
+import java.text.Normalizer;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+
+public class IngredienteCellFactory implements Callback<ListView<Ingrediente>, ListCell<Ingrediente>> {
+
+    private final BiConsumer<Ingrediente, Integer> onAdd;
+    private final Consumer<Ingrediente> onRemove;
+
+    public IngredienteCellFactory(BiConsumer<Ingrediente, Integer> onAdd, Consumer<Ingrediente> onRemove) {
+        this.onAdd = onAdd;
+        this.onRemove = onRemove;
+    }
+
+    @Override
+    public ListCell<Ingrediente> call(ListView<Ingrediente> listView) {
+        return new ListCell<Ingrediente>() {
+
+            private final HBox content = new HBox(10);
+            private final ImageView imageView = new ImageView();
+            private final CheckBox checkBox = new CheckBox();
+            private final Spinner<Integer> quantitySpinner = new Spinner<>(1, 10, 1);
+
+            {
+                imageView.setFitWidth(30);
+                imageView.setFitHeight(30);
+                imageView.setPreserveRatio(true);
+
+                quantitySpinner.setPrefWidth(60);
+                quantitySpinner.setDisable(true); // Desactivado por defecto
+
+                // Cambiar cantidad manualmente
+                quantitySpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+                    Ingrediente ing = getItem();
+                    if (checkBox.isSelected() && ing != null) {
+                        onAdd.accept(ing, newVal);
+                    }
+                });
+
+                checkBox.setOnAction(event -> {
+                    Ingrediente ing = getItem();
+                    if (ing == null) return;
+
+                    if (checkBox.isSelected()) {
+                        quantitySpinner.setDisable(false);
+                        onAdd.accept(ing, quantitySpinner.getValue());
+                    } else {
+                        quantitySpinner.setDisable(true);
+                        onRemove.accept(ing);
+                    }
+                });
+
+                content.getChildren().addAll(imageView, checkBox, quantitySpinner);
+            }
+
+            @Override
+            protected void updateItem(Ingrediente ing, boolean empty) {
+                super.updateItem(ing, empty);
+                if (empty || ing == null) {
+                    setGraphic(null);
+                } else {
+                    cargarImagen(ing);
+                    checkBox.setText(ing.getNombre() + " - $" + String.format("%.2f", ing.getPrecio()));
+                    checkBox.setSelected(false);
+                    quantitySpinner.getValueFactory().setValue(1);
+                    quantitySpinner.setDisable(true);
+                    setGraphic(content);
+                }
+            }
+
+            private void cargarImagen(Ingrediente ing) {
+                String fileName = sanitizeFileName(ing.getNombre());
+                String[] extensiones = {".png", ".jpg"};
+                boolean encontrada = false;
+
+                for (String ext : extensiones) {
+                    String imagePath = "/burgervend/imagenes/ingredientes/" + fileName + ext;
+                    try (InputStream stream = getClass().getResourceAsStream(imagePath)) {
+                        if (stream != null) {
+                            imageView.setImage(new Image(stream));
+                            encontrada = true;
+                            break;
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error cargando imagen: " + e.getMessage());
+                    }
+                }
+
+                if (!encontrada) {
+                    imageView.setImage(null);
+                    System.err.println("Imagen NO encontrada para: " + fileName);
+                }
+            }
+        };
+    }
+
+    private String sanitizeFileName(String nombre) {
+        String normalized = Normalizer.normalize(nombre.toLowerCase(), Normalizer.Form.NFD);
+        return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("");
+    }
+
+    public static IngredienteCellFactory create(BiConsumer<Ingrediente, Integer> onAdd, Consumer<Ingrediente> onRemove) {
+        return new IngredienteCellFactory(onAdd, onRemove);
+    }
+}
+
+package burgervend.controllers;
+
+import burgervend.models.Pedido;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.VBox;
+
+public class PagoController {
+
+    @FXML private VBox paymentMethodsContainer;
+    @FXML private Label lblAmount;
+
+    private ToggleGroup toggleGroup;
+
+    // Este es el pedido que recibirás del flujo anterior
+    private Pedido pedido;
+
+    @FXML
+    private void initialize() {
+        toggleGroup = new ToggleGroup();
+
+        RadioButton rbTarjeta = new RadioButton("Tarjeta");
+        RadioButton rbEfectivo = new RadioButton("Efectivo");
+
+        rbTarjeta.setToggleGroup(toggleGroup);
+        rbEfectivo.setToggleGroup(toggleGroup);
+
+        paymentMethodsContainer.getChildren().addAll(rbTarjeta, rbEfectivo);
+
+        // Simulación de monto dinámico a partir del pedido
+        if (pedido != null) {
+            double montoAPagar = pedido.calcularTotal(); // Monto calculado desde el pedido
+            lblAmount.setText(String.format("Monto a pagar: $%.2f", montoAPagar));
+        } else {
+            lblAmount.setText("Monto a pagar: $0.00");
+        }
+    }
+
+    // Este es el método que se ejecuta cuando el usuario hace clic en "Pagar"
+    @FXML
+private void onPagarClick() {
+    RadioButton selected = (RadioButton) toggleGroup.getSelectedToggle();
+    
+    if (selected == null) {
+        mostrarAlerta("Error", "Selecciona un método de pago.");
+        return;
+    }
+    
+    String metodoPago = selected.getText(); // Obtener el método de pago
+
+    try {
+        if ("Tarjeta".equals(metodoPago)) {
+            // Lógica para procesar el pago con tarjeta
+            procesarPagoConTarjeta();
+        } else if ("Efectivo".equals(metodoPago)) {
+            // Lógica para procesar el pago en efectivo
+            procesarPagoConEfectivo();
+        } else {
+            mostrarAlerta("Error", "Método de pago desconocido.");
+        }
+    } catch (Exception e) {
+        // Capturar cualquier excepción que ocurra durante el proceso de pago
+        e.printStackTrace();  // Mostrar el error en la consola
+        mostrarAlerta("Error de pago", "Ocurrió un error al intentar realizar el pago. Por favor, intente nuevamente.");
+    }
+}
+
+// Método para procesar pago con tarjeta
+private void procesarPagoConTarjeta() {
+    try {
+        // Lógica simulada de procesamiento de pago con tarjeta
+        System.out.println("Procesando pago con tarjeta...");
+        
+        // Simulamos que el pago fue exitoso
+        mostrarAlerta("Pago Realizado", "El pago con tarjeta se ha procesado correctamente.");
+    } catch (Exception e) {
+        e.printStackTrace();
+        mostrarAlerta("Error", "Hubo un error al procesar el pago con tarjeta.");
+    }
+}
+
+// Método para procesar pago con efectivo
+private void procesarPagoConEfectivo() {
+    try {
+        // Lógica simulada de procesamiento de pago en efectivo
+        System.out.println("Procesando pago con efectivo...");
+        
+        // Simulamos que el pago fue exitoso
+        mostrarAlerta("Pago Realizado", "El pago en efectivo se ha procesado correctamente.");
+    } catch (Exception e) {
+        e.printStackTrace();
+        mostrarAlerta("Error", "Hubo un error al procesar el pago con efectivo.");
+    }
+}
+
+
+    // Función para mostrar alertas de error
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    // Método para recibir el pedido de la vista anterior
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+    }
+}
+
+package burgervend.controllers;
+
+import javafx.fxml.FXML;
+import burgervend.utils.ScreenManager;
+
+public class ExitoController {
+    @FXML
+    private void onVolverClick() {
+        ScreenManager.loadScreen("Main"); // Para volver al menú principal
+    }
+}
+
+
+package burgervend.controllers;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import burgervend.utils.ScreenManager;
+
+public class ErrorPagoController {
+
+    @FXML
+    private void onVolverClick(ActionEvent event) {
+        // Vuelve a la pantalla anterior, por ejemplo, a la de pago
+        ScreenManager.loadScreen("PaymentView");
+    }
+}
+
+componentes.css
+/* Estilo de los botones de ingredientes */
+.ingredient-button {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 5px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+}
+
+.ingredient-button:hover {
+    -fx-background-color: #d6eaf8;
+}
+
+/* Estilo de las tarjetas de hamburguesas */
+.burger-card {
+    -fx-background-color: white;
+    -fx-border-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+    -fx-padding: 15px;
+}
+
+/* Estilo de los métodos de pago */
+.payment-method {
+    -fx-background-color: #06d445;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 8px;
+    -fx-padding: 15px;
+}
+
+.payment-method:hover {
+    -fx-background-color: #45a049;
+    -fx-border-color: #3e8e41;
+}
+
+/* Estilo del panel de confirmación */
+.confirmation-panel {
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-padding: 20px;
+    -fx-background-radius: 10px;
+}
+
+/* Estilo del botón de pago */
+.pay-button {
+    -fx-background-color: #52be80;
+    -fx-text-fill: white;
+    -fx-border-radius: 5px;
+    -fx-padding: 10px 20px;
+    -fx-font-weight: bold;
+}
+
+.pay-button:hover {
+    -fx-background-color: #45a049;
+}
+
+/* Estilo del título de sección */
+.section-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Estilo de la etiqueta de cantidad */
+.amount-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #1e8449;
+    -fx-font-weight: bold;
+}
+
+/* Reemplaza todas las definiciones de image-view por esta */
+.image-container {
+    -fx-border-color: #d35400; /* Naranja para mejor debug */
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-color: #f9f9f9;
+    -fx-padding: 10px;
+}
+
+.image-view {
+    -fx-fit-width: 300px;
+    -fx-fit-height: 300px;
+    -fx-preserve-ratio: true;
+    -fx-smooth: true;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+.list-cell {
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #d6eaf8;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+mainn.css
+
+/* la raíz de la aplicación */
+.root {
+    -fx-background-color: #c80a0a; 
+    -fx-font-family: 'Arial';
+    -fx-padding: 20;
+    -fx-min-width: 400px;
+    -fx-min-height: 300px;
+}
+
+/* para títulos generales */
+.title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #07c036;
+}
+
+/* base para botones */
+.button {
+    -fx-background-color:  #f0f40a ;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+/* para botones principales */
+.main-button {
+    -fx-font-size: 16px;
+    -fx-padding: 10 20;
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/*  para las imágenes */
+.image-view {
+    -fx-alignment: center;
+}
+
+/*  para la ListView rosadito*/
+.list-view {
+    -fx-background-color: #F08080;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 5px;
+}
+
+/* para celdas de la ListView */
+.list-cell {
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #d6eaf8;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+/* para titulos */
+.label {
+    -fx-text-fill:  #1db813;
+}
+
+/* para campos de texto */
+.text-field {
+    -fx-background-color:  #b8137a ;
+    -fx-border-radius: 5px;
+    -fx-padding: 10px;
+    -fx-border-color: #bdc3c7;
+}
+
+/* para los RadioButton */
+.radio-button {
+    -fx-text-fill: #2c3e50;
+}
+.image-view {
+    -fx-border-color: red;
+    -fx-border-width: 2px;
+}
+.image-view {
+    -fx-fit-width: 30px;
+    -fx-fit-height: 30px;
+    -fx-preserve-ratio: true;
+    -fx-smooth: true;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+
+package burgervend.utils;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import burgervend.controllers.CustomizationController;
+import burgervend.controllers.DeliveryController;
+import burgervend.controllers.PaymentController;
+import burgervend.controllers.ResumenController;
+
+import burgervend.models.Hamburguesa;
+import burgervend.models.Pedido;
+
+public class ScreenManager {
+
+    private static Stage primaryStage;
+
+    public static void setPrimaryStage(Stage stage) {
+        primaryStage = stage;
+    }
+
+    public static void loadScreen(String fxmlName) {
+        loadScreen(fxmlName, (Object[]) null);
+    }
+
+    public static void loadScreen(String fxmlName, Object... params) {
+        if (primaryStage == null) {
+            throw new IllegalStateException("primaryStage no ha sido inicializado. Llama a setPrimaryStage() primero.");
+        }
+
+        try {
+            // Capitalizar y construir nombre de archivo evitando duplicar "View"
+            String capitalizedFxml = capitalize(fxmlName);
+            if (!capitalizedFxml.endsWith("View")) {
+                capitalizedFxml += "View";
+            }
+            String path = "/burgervend/views/" + capitalizedFxml + ".fxml";
+            System.out.println("Intentando cargar: " + path);
+
+            // Cargar el archivo FXML
+            java.net.URL fxmlURL = ScreenManager.class.getResource(path);
+            if (fxmlURL == null) {
+                throw new IllegalStateException("No se encontró la vista FXML: " + path);
+            }
+
+            FXMLLoader loader = new FXMLLoader(fxmlURL);
+            Parent root = loader.load();
+
+            // Obtener el controlador de la vista cargada
+            Object controller = loader.getController();
+
+            // Asignar parámetros si aplica
+            if (controller != null && params != null && params.length > 0) {
+                for (Object param : params) {
+                    if (controller instanceof CustomizationController && param instanceof Hamburguesa) {
+                        ((CustomizationController) controller).setHamburguesa((Hamburguesa) param);
+                    } else if (controller instanceof DeliveryController && param instanceof Hamburguesa) {
+                        ((DeliveryController) controller).setHamburguesa((Hamburguesa) param);
+                    } else if (controller instanceof ResumenController && param instanceof Pedido) {
+                        ((ResumenController) controller).setPedido((Pedido) param);
+                    } else if (controller instanceof PaymentController && param instanceof Pedido) {
+                        ((PaymentController) controller).setPedido((Pedido) param);
+                    }
+                }
+            }
+
+            // Mostrar la vista en el Stage
+            Scene scene = primaryStage.getScene();
+            if (scene == null) {
+                scene = new Scene(root);
+                primaryStage.setScene(scene);
+            } else {
+                scene.setRoot(root);
+            }
+
+            primaryStage.sizeToScene();
+            primaryStage.setMinWidth(600);
+            primaryStage.setMinHeight(400);
+
+        } catch (Exception e) {
+            System.err.println("Error cargando la pantalla FXML: " + fxmlName);
+            e.printStackTrace();
+        }
+    }
+
+    public static void loadCustomizationScreen(Hamburguesa hamburguesa) {
+        loadScreen("Customization", hamburguesa);
+    }
+
+    public static void loadDeliveryScreen(Hamburguesa hamburguesa) {
+        loadScreen("Delivery", hamburguesa);
+    }
+
+    private static String capitalize(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+}
+
+package burgervend.utils;
+
+import javafx.scene.image.Image;
+
+import java.io.InputStream;
+import java.util.Scanner;
+
+public class ResourceManager {
+
+    // Cargar imagen desde los recursos
+    public static Image loadImage(String path) {
+        String fullPath = "/burgervend/imagenes/" + path;
+        try (InputStream is = ResourceManager.class.getResourceAsStream(fullPath)) {
+            if (is == null) {
+                System.err.println("No se encontró la imagen: " + fullPath);
+                return null;
+            }
+            System.out.println("Cargando imagen desde: " + fullPath);
+            return new Image(is);
+        } catch (Exception e) {
+            System.err.println("Error cargando imagen: " + fullPath);
+            return null;
+        }
+    }
+
+    // Método para cargar otros recursos (como JSON) si es necesario
+    public static String getJsonData(String filename) {
+        try (InputStream is = ResourceManager.class.getResourceAsStream("/burgervend/data/" + filename)) {
+            if (is == null) {
+                System.err.println("No se encontró el archivo JSON: " + filename);
+                return "[]";
+            }
+            Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");
+            return scanner.hasNext() ? scanner.next() : "";
+        } catch (Exception e) {
+            System.err.println("Error cargando JSON: " + filename);
+            return "[]";
+        }
+    }
+}
+
+
+package burgervend.utils;
+
+import com.google.gson.*;
+import burgervend.models.ingredientes.*;
+
+import java.lang.reflect.Type;
+
+public class IngredienteTypeAdapter implements JsonDeserializer<Ingrediente> {
+    @Override
+    public Ingrediente deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        JsonObject jsonObject = json.getAsJsonObject();
+        String tipo = jsonObject.get("tipo").getAsString();  // Suponiendo que "tipo" es la clave
+        
+        // Obtener otras propiedades
+        String nombre = jsonObject.get("nombre").getAsString();
+        double precio = jsonObject.get("precio").getAsDouble();
+        
+        // Ajusta la llamada al constructor para incluir todos los parámetros necesarios
+        switch (tipo) {
+            case "Carne":
+                String meatType = "res";  // Puedes extraer el tipo de carne desde el JSON si lo necesitas
+                return new Carne(nombre, precio, meatType);  // Ahora pasas los tres parámetros
+            case "Queso":
+                String cheeseType = "cheddar";  // Puedes asignar el tipo de queso, por ejemplo
+                return new Queso(nombre, precio, cheeseType);  // Ahora pasas los tres parámetros
+            // Maneja otros tipos aquí...
+            default:
+                throw new JsonParseException("Tipo de ingrediente desconocido: " + tipo);
+        }
+    }
+}
+
+package burgervend.utils;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import burgervend.models.Pedido;
+import burgervend.models.ingredientes.Ingrediente;
+import java.util.List;
+
+public class GsonHelper {
+
+    // Instancia estática de Gson
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Ingrediente.class, new IngredienteTypeAdapter())
+            .create();
+
+    // Método para obtener la instancia de Gson
+    public static Gson obtenerGson() {
+        return gson;
+    }
+
+    // Método para convertir un objeto Pedido a JSON
+    public static String serializarPedido(Pedido pedido) {
+        return gson.toJson(pedido);
+    }
+
+    // Método para convertir una lista de pedidos a JSON
+    public static String serializarPedidos(List<Pedido> pedidos) {
+        return gson.toJson(pedidos);
+    }
+
+    // Método para convertir JSON a objeto Pedido
+    public static Pedido deserializarPedido(String json) {
+        return gson.fromJson(json, Pedido.class);
+    }
+
+    // Método para convertir JSON a lista de Pedidos
+    public static List<Pedido> deserializarPedidos(String json) {
+        return gson.fromJson(json, List.class);
+    }
+}
+
+package burgervend.utils;
+
+import burgervend.models.Pedido;
+
+public class AppState {
+    private static Pedido pedidoActual;
+
+    public static void setPedidoActual(Pedido pedido) {
+        AppState.pedidoActual = pedido;
+    }
+
+    public static Pedido getPedidoActual() {
+        return pedidoActual;
+    }
+}
+
+package burgervend.utils;
+
+import javafx.animation.FadeTransition;
+import javafx.scene.Node;
+import javafx.util.Duration;
+
+public class Animations {
+    public static void fadeIn(Node node) {
+        FadeTransition ft = new FadeTransition(Duration.millis(300), node);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
+    }
+
+    public static void fadeOut(Node node) {
+        FadeTransition ft = new FadeTransition(Duration.millis(300), node);
+        ft.setFromValue(1);
+        ft.setToValue(0);
+        ft.play();
+    }
+}
+
+package burgervend.services;
+
+import burgervend.models.Pedido;
+import burgervend.models.ingredientes.Ingrediente;
+import burgervend.utils.IngredienteTypeAdapter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class PedidoRepository {
+
+    private static final String FILE_PATH = "pedidos.json";
+
+    // Instancia estática de Gson con el TypeAdapter registrado
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Ingrediente.class, new IngredienteTypeAdapter())  // Registra el adaptador personalizado
+            .create();
+
+    // Método para guardar un pedido
+    public static String guardarPedido(Pedido pedido) {
+        List<Pedido> pedidos = obtenerPedidosExistentes();
+        pedidos.add(pedido);
+
+        // Escribe la lista actualizada de pedidos en el archivo
+        try (Writer writer = new FileWriter(FILE_PATH)) {
+            gson.toJson(pedidos, writer);
+            return String.valueOf(pedido.getId());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Método para obtener los pedidos existentes
+    public static List<Pedido> obtenerPedidosExistentes() {
+        // Leemos el JSON desde el archivo
+        String pedidosJson = obtenerDatosDeArchivo();
+
+        // Si no hay datos, devolvemos una lista vacía
+        if (pedidosJson == null || pedidosJson.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Deserializa el JSON a una lista de objetos Pedido
+        return Arrays.asList(gson.fromJson(pedidosJson, Pedido[].class));
+    }
+
+    // Método para leer el contenido del archivo de pedidos
+    private static String obtenerDatosDeArchivo() {
+        File archivo = new File(FILE_PATH);
+
+        // Si el archivo no existe, retornamos una cadena vacía o null
+        if (!archivo.exists()) {
+            return "";
+        }
+
+        // Leemos el archivo y devolvemos su contenido como un String
+        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
+            StringBuilder stringBuilder = new StringBuilder();
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                stringBuilder.append(linea);
+            }
+            return stringBuilder.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+
+package burgervend.services;
+
+import burgervend.utils.ResourceManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PagoService {
+    private List<String> metodosPago;
+    
+    public PagoService() {
+        cargarMetodosPago();
+    }
+    
+    private void cargarMetodosPago() {
+        metodosPago = new ArrayList<>();
+        String json = ResourceManager.getJsonData("metodos_pago.json");
+        JSONArray array = new JSONArray(json);
+        
+        for (int i = 0; i < array.length(); i++) {
+            metodosPago.add(array.getString(i));
+        }
+    }
+    
+    public List<String> getMetodosPago() {
+        return new ArrayList<>(metodosPago);
+    }
+    
+    // Simulación de pasarela de pago
+    public boolean procesarPago(double monto, String metodo) {
+    
+        return Math.random() > 0.2;
+    }
+}
+
+package burgervend.services;
+
+import burgervend.models.ingredientes.Ingrediente;
+import java.util.List;
+
+public class MotorPersonalizacion {
+    private final GestorIngredientes gestorIngredientes;
+    
+    public MotorPersonalizacion(GestorIngredientes gestorIngredientes) {
+        this.gestorIngredientes = gestorIngredientes;
+    }
+    
+    public List<Ingrediente> getOpcionesPersonalizacion() {
+        return gestorIngredientes.getIngredientesDisponibles();
+    }
+      // para aceptar combinaciones permitidas
+    public boolean validarCombinacion(List<Ingrediente> ingredientes) {
+        
+        return !ingredientes.isEmpty();
+    }
+}
+
+
+package burgervend.services;
+
+import burgervend.models.ingredientes.*;
+import com.google.gson.*;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
+
+public class IngredienteLoader {
+
+    public static List<Ingrediente> cargarIngredientesDesdeJson(String archivo) throws IOException {
+        Gson gson = new Gson();
+        List<Ingrediente> lista = new ArrayList<>();
+
+        try (FileReader reader = new FileReader(archivo)) {
+            JsonArray jsonArray = JsonParser.parseReader(reader).getAsJsonArray();
+            for (JsonElement elem : jsonArray) {
+                JsonObject obj = elem.getAsJsonObject();
+                String tipo = obj.get("tipo").getAsString();
+                String nombre = obj.get("nombre").getAsString();
+                double precio = obj.get("precio").getAsDouble();
+
+                switch (tipo.toLowerCase()) {
+                    case "carne": lista.add(new Carne(nombre, precio, "Carne")); break;
+                    case "queso": lista.add(new Queso(nombre, precio, "Queso")); break;
+                    case "vegetal": lista.add(new Vegetal(nombre, precio,  "Vegetal")); break;
+                    case "salsa": lista.add(new Salsa(nombre, precio, "Salsa")); break;
+                    default: throw new IllegalArgumentException("Tipo desconocido: " + tipo);
+                }
+            }
+        }
+
+        return lista;
+    }
+}
+
+
+package burgervend.services;
+
+import burgervend.models.Hamburguesa;
+import burgervend.models.Pedido;
+import burgervend.utils.ResourceManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
+
+public class GestorPedidos {
+    private final List<Hamburguesa> hamburguesasBase;
+    
+    public GestorPedidos() {
+        this.hamburguesasBase = cargarHamburguesasBase();
+    }
+    
+    private List<Hamburguesa> cargarHamburguesasBase() {
+        List<Hamburguesa> hamburguesas = new ArrayList<>();
+        String json = ResourceManager.getJsonData("hamburguesas.json");
+        JSONArray array = new JSONArray(json);
+        
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject obj = array.getJSONObject(i);
+            String nombre = obj.getString("nombre");
+            double precio = obj.getDouble("precioBase");
+            hamburguesas.add(new Hamburguesa(nombre, precio));
+        }
+        
+        return hamburguesas;
+    }
+    
+    public List<Hamburguesa> getHamburguesasBase() {
+        return new ArrayList<>(hamburguesasBase);
+    }
+    
+    public void guardarPedido(Pedido pedido) {
+   
+    }
+}
+
+package burgervend.services;
+
+import burgervend.models.ingredientes.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class GestorIngredientes {
+    private List<Ingrediente> ingredientesDisponibles;
+
+    public GestorIngredientes() {
+        ingredientesDisponibles = new ArrayList<>();
+        cargarIngredientes();
+    }
+
+    private void cargarIngredientes() {
+        InputStream jsonStream = getClass().getResourceAsStream("/burgervend/data/ingredientes.json");
+        if (jsonStream != null) {
+            try (Scanner scanner = new Scanner(jsonStream).useDelimiter("\\A")) {
+                String jsonStr = scanner.hasNext() ? scanner.next() : "";
+                JSONArray jsonArray = new JSONArray(jsonStr);
+                ingredientesDisponibles = new ArrayList<>();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject obj = jsonArray.getJSONObject(i);
+                    String tipo = obj.getString("tipo");
+                    String nombre = obj.getString("nombre");
+                    double precio = obj.getDouble("precio");
+
+                    Ingrediente ing = null;
+                    switch (tipo.toLowerCase()) {
+                        case "carne":
+                            ing = new Carne(nombre, precio, "carne");
+                            break;
+                        case "queso":
+                            ing = new Queso(nombre, precio, "queso");
+                            break;
+                        case "vegetal":
+                            ing = new Vegetal(nombre, precio, "vegetal");
+                            break;
+                        case "salsa":
+                            ing = new Salsa(nombre, precio, "salsa");
+                            break;
+                        default:
+                            System.out.println("Tipo de ingrediente desconocido: " + tipo);
+                    }
+
+                    if (ing != null) ingredientesDisponibles.add(ing);
+                }
+            } catch (Exception e) {
+                System.out.println("Error al leer JSON: " + e.getMessage());
+            }
+        }
+
+    }
+
+    public List<Ingrediente> getIngredientesDisponibles() {
+        return new ArrayList<>(ingredientesDisponibles);
+    }
+}
+
+
+package burgervend.services;
+
+import burgervend.models.Pedido;
+import java.sql.*;
+
+public class DatabaseService {
+
+    private static final String URL = "jdbc:sqlite:burger_vend.db";
+
+    static {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error cargando driver SQLite: " + e.getMessage());
+        }
+    }
+
+    public static void initDatabase() {
+        String sql = "CREATE TABLE IF NOT EXISTS pedidos ("
+                + "id TEXT PRIMARY KEY,"
+                + "fecha TEXT NOT NULL,"
+                + "hamburguesa TEXT NOT NULL,"
+                + "ingredientes TEXT NOT NULL,"
+                + "total REAL NOT NULL,"
+                + "metodo_pago TEXT,"
+                + "estado TEXT NOT NULL)";
+
+        try (Connection conn = DriverManager.getConnection(URL);
+                Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            System.err.println("Error inicializando BD: " + e.getMessage());
+        }
+    }
+
+    public static void guardarPedido(Pedido pedido) {
+        String sql = "INSERT INTO pedidos(id, fecha, hamburguesa, ingredientes, total, metodo_pago, estado) "
+                + "VALUES(?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(URL);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, pedido.getId());
+            pstmt.setString(2, pedido.getFecha().toString());
+            pstmt.setString(3, pedido.getHamburguesaBase().getNombre());
+            pstmt.setString(4, pedido.getIngredientesAsString());
+            pstmt.setDouble(5, pedido.calcularTotal());
+            pstmt.setString(6, pedido.getMetodoPago());
+            pstmt.setString(7, pedido.getEstado());
+
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error guardando pedido: " + e.getMessage());
+        }
+    }
+}
+
+package burgervend.models.pago;
+
+public class ProcesadorPagos {
+    private EstrategiaPago estrategia;
+    
+    public void setEstrategia(EstrategiaPago estrategia) {
+        this.estrategia = estrategia;
+    }
+    
+    public boolean procesar(double monto, String metodo) {
+    if (monto < 0) {
+        System.out.println("El monto no puede ser negativo.");
+        return false;
+    }
+    
+    if (metodo == null || metodo.isEmpty()) {
+        System.out.println("Método de pago no válido.");
+        return false;
+    }
+
+    if (metodo.equalsIgnoreCase("efectivo")) {
+        setEstrategia(new PagoEfectivo());
+    } else if (metodo.equalsIgnoreCase("tarjeta")) {
+        setEstrategia(new PagoTarjeta());
+    } else {
+        System.out.println("Método de pago desconocido.");
+        return false;
+    }
+
+    return estrategia != null && estrategia.pagar(monto);
+    }
+}
+package burgervend.models.pago;
+
+public class PagoTarjeta implements EstrategiaPago {
+    @Override
+    public boolean pagar(double monto) {
+        System.out.println("Procesando pago con tarjeta: $" + monto);
+        String numeroTarjeta = "1234567812345678"; // Aquí deberías obtener el número real
+        if (numeroTarjeta == null || numeroTarjeta.length() != 16 || !numeroTarjeta.matches("\\d+")) {
+            System.out.println("Número de tarjeta inválido.");
+            return false;
+        }
+        
+        System.out.println("Número de tarjeta válido.");
+        return Math.random() > 0.3;  // Simulando un pago aprobado
+    }
+}
+
+package burgervend.models.pago;
+
+public class PagoEfectivo implements EstrategiaPago {
+    @Override
+    public boolean pagar(double monto) {
+        // Lógica específica para pago en efectivo
+        System.out.println("Procesando pago en efectivo: $" + monto);
+        return true;
+    }
+}
+
+package burgervend.models.pago;
+
+public interface EstrategiaPago {
+    boolean pagar(double monto);
+}
+
+package burgervend.models.builder;
+
+import burgervend.models.*;
+import burgervend.models.ingredientes.*;
+import java.util.ArrayList;
+
+public class ConstructorHamburguesa {
+    private final Pedido pedido;
+
+    public ConstructorHamburguesa() {
+        Hamburguesa base = new Hamburguesa("Personalizada", 0);
+        this.pedido = new Pedido(base, new ArrayList<>());
+    }
+
+    public ConstructorHamburguesa agregarCarne(String tipo, double precio) {
+        pedido.agregarIngrediente(new Carne(tipo, precio, "carne"), 1);
+        return this;
+    }
+
+    public ConstructorHamburguesa agregarQueso(String tipo, double precio) {
+        pedido.agregarIngrediente(new Queso(tipo, precio, "queso"), 1);
+        return this;
+    }
+
+    public ConstructorHamburguesa agregarVegetal(String tipo, double precio) {
+        pedido.agregarIngrediente(new Vegetal(tipo, precio, "vegetal"), 1);
+        return this;
+    }
+
+    public ConstructorHamburguesa agregarSalsa(String tipo, double precio) {
+        pedido.agregarIngrediente(new Salsa(tipo, precio, "salsa"), 1);
+        return this;
+    }
+
+    public Pedido construir() {
+        return pedido;
+    }
+}
+
+package burgervend.models.builder;
+
+import burgervend.models.Hamburguesa;
+import burgervend.models.Pedido;
+
+public class HamburguesaBuilder {
+    private final ConstructorHamburguesa constructor;
+
+    public HamburguesaBuilder() {
+        this.constructor = new ConstructorHamburguesa();
+    }
+
+    public HamburguesaBuilder withCarne(String tipo, double precio) {
+        constructor.agregarCarne(tipo, precio);
+        return this;
+    }
+
+    public HamburguesaBuilder withQueso(String tipo, double precio) {
+        constructor.agregarQueso(tipo, precio);
+        return this;
+    }
+
+    public HamburguesaBuilder withVegetal(String tipo, double precio) {
+        constructor.agregarVegetal(tipo, precio);
+        return this;
+    }
+
+    public HamburguesaBuilder withSalsa(String tipo, double precio) {
+        constructor.agregarSalsa(tipo, precio);
+        return this;
+    }
+
+    public Hamburguesa build() {
+        Pedido pedido = constructor.construir();
+        return new Hamburguesa(pedido);
+    }
+}
+
+package burgervend.models;
+
+import burgervend.models.ingredientes.Ingrediente;
+import java.util.List;
+import java.util.ArrayList;
+
+public class Hamburguesa {
+    private String nombre;
+    private double precioBase;
+    private List<Ingrediente> ingredientes;
+    private String estado;
+
+    // para hamburguesas del menú
+    public Hamburguesa(String nombre, double precioBase) {
+        this.nombre = nombre;
+        this.precioBase = precioBase;
+        this.ingredientes = new ArrayList<>();
+        this.estado = "DISPONIBLE";
+    }
+
+    // para hamburguesas personalizadas
+    public Hamburguesa(Pedido pedido) {
+        this.nombre = "Personalizada";
+        this.precioBase = 0;
+        this.ingredientes = new ArrayList<>(pedido.getIngredientes().keySet());
+        this.estado = "PREPARADA";
+    }
+
+    public void agregarIngrediente(Ingrediente ingrediente) {
+        ingredientes.add(ingrediente);
+    }
+
+    public void removerIngrediente(Ingrediente ingrediente) {
+        ingredientes.remove(ingrediente);
+    }
+
+    public double getPrecioTotal() {
+        return precioBase + ingredientes.stream().mapToDouble(Ingrediente::getPrecio).sum();
+    }
+
+    public String getResumen() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Hamburguesa: ").append(nombre).append("\n");
+        sb.append("Ingredientes:\n");
+        ingredientes.forEach(ing -> sb.append("- ").append(ing.getNombre()).append("\n"));
+        sb.append("Total: $").append(String.format("%.2f", getPrecioTotal()));
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return nombre + " - $" + String.format("%.2f", getPrecioTotal());
+    }
+
+    public String getIngredientesTexto() {
+        StringBuilder sb = new StringBuilder();
+        for (Ingrediente ing : ingredientes) {
+            sb.append(ing.getNombre()).append(", ");
+        }
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 2);
+        }
+        return sb.toString();
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public List<Ingrediente> getIngredientes() {
+        return new ArrayList<>(ingredientes);
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public double getPrecioBase() {
+        return precioBase;
+    }
+}
+
+
+
+package burgervend.models;
+
+import burgervend.models.ingredientes.Ingrediente;
+import java.time.LocalDateTime;
+import java.util.*;
+
+public class Pedido {
+    private final String id;
+    private final Hamburguesa hamburguesaBase;
+    private final Map<Ingrediente, Integer> ingredientes;
+    private final LocalDateTime fecha;
+    private String estado;
+    private String metodoPago;
+    private boolean pagoAprobado;
+
+    public Pedido(Hamburguesa hamburguesaBase, List<Ingrediente> ingredientes) {
+        if (hamburguesaBase == null || ingredientes == null) {
+            throw new IllegalArgumentException("Hamburguesa base e ingredientes no pueden ser null");
+        }
+
+        this.id = generarIdUnico();
+        this.hamburguesaBase = hamburguesaBase;
+        this.ingredientes = new HashMap<>();
+        for (Ingrediente ing : ingredientes) {
+            agregarIngrediente(ing, 1);
+        }
+        this.fecha = LocalDateTime.now();
+        this.estado = "PENDIENTE";
+        this.metodoPago = null;
+        this.pagoAprobado = false;
+    }
+
+    private String generarIdUnico() {
+        return "PED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    public void agregarIngrediente(Ingrediente ingrediente, int cantidad) {
+        if (ingrediente == null || cantidad <= 0) return;
+        ingredientes.put(ingrediente, cantidad);
+    }
+
+    public void removerIngrediente(Ingrediente ingrediente) {
+        ingredientes.remove(ingrediente);
+    }
+
+    public double calcularTotal() {
+        double total = hamburguesaBase.getPrecioBase();
+        for (Map.Entry<Ingrediente, Integer> entry : ingredientes.entrySet()) {
+            total += entry.getKey().getPrecio() * entry.getValue();
+        }
+        return total;
+    }
+
+    public String getIngredientesAsString() {
+        if (ingredientes.isEmpty()) {
+            return "- Sin ingredientes adicionales";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Ingrediente, Integer> entry : ingredientes.entrySet()) {
+            sb.append(entry.getValue()).append("x ").append(entry.getKey().getNombre()).append(", ");
+        }
+        return sb.substring(0, sb.length() - 2);
+    }
+
+    public String generarResumenPago() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\t\t\t\t\t****** CALCULO DE PRECIO TOTAL ******\n\n")
+          .append("\t\t\t\t\tEligió: Hamburguesa ").append(hamburguesaBase.getNombre()).append("\n\n")
+          .append("\t\t\t\t\tIngredientes adicionales:\n");
+
+        if (ingredientes.isEmpty()) {
+            sb.append("- Sin ingredientes adicionales\n");
+        } else {
+            ingredientes.forEach((ing, qty) ->
+                sb.append("\t\t\t\t\t- ").append(qty).append("x ").append(ing.getNombre()).append("\t\t\t\t\n"));
+        }
+
+        sb.append("\t\t\t\t\t___________________________________________\n")
+          .append("\t\t\t\t\tTOTAL A PAGAR: $").append(String.format("\t\t\t\t%.2f\n", calcularTotal()));
+
+        return sb.toString();
+    }
+    public String generarResumen() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== RESUMEN DE COMPRA ===\n")
+          .append("ID: ").append(id).append("\n")
+          .append("Hamburguesa: ").append(hamburguesaBase.getNombre()).append("\n")
+          .append("Ingredientes:\n");
+
+        if (ingredientes.isEmpty()) {
+            sb.append("- Sin ingredientes adicionales\n");
+        } else {
+            ingredientes.forEach((ing, qty) ->
+                sb.append("- ").append(qty).append("x ").append(ing.getNombre()).append("\n"));
+        }
+
+        sb.append("---------------------------\n")
+          .append("TOTAL: $").append(String.format("%.2f", calcularTotal()));
+
+        return sb.toString();
+    }
+
+    public void aprobarPago(String metodo) {
+        if (metodo == null || metodo.isEmpty()) {
+            throw new IllegalArgumentException("Método de pago no puede ser null o vacío");
+        }
+        this.metodoPago = metodo;
+        this.pagoAprobado = true;
+        this.estado = "PAGADO";
+    }
+
+    public void rechazarPago() {
+        this.pagoAprobado = false;
+        this.estado = "PENDIENTE";
+    }
+
+    public void cancelarPedido() {
+        this.estado = "CANCELADO";
+    }
+
+    // Getters
+    public String getId() { return id; }
+    public Hamburguesa getHamburguesaBase() { return hamburguesaBase; }
+    public Map<Ingrediente, Integer> getIngredientes() { return new HashMap<>(ingredientes); }
+    public LocalDateTime getFecha() { return fecha; }
+    public String getEstado() { return estado; }
+    public String getMetodoPago() { return metodoPago; }
+    public boolean isPagoAprobado() { return pagoAprobado; }
+
+    public int getCantidadIngrediente(Ingrediente ing) {
+        return ingredientes.getOrDefault(ing, 0);
+    }
+    
+    
+
+    @Override
+    public String toString() {
+        return "Pedido{" +
+                "id='" + id + '\'' +
+                ", hamburguesa=" + hamburguesaBase.getNombre() +
+                ", ingredientes=" + getIngredientesAsString() +
+                ", total=$" + String.format("%.2f", calcularTotal()) +
+                ", estado=" + estado +
+                '}';
+    }
+}
+
+package burgervend.models;
+
+import burgervend.models.ingredientes.Ingrediente;
+import burgervend.models.pago.ProcesadorPagos;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MaquinaExpendedora {
+    public enum Estado {
+        ESPERANDO_PEDIDO, PERSONALIZANDO, PAGO_PENDIENTE, ENTREGANDO
+    }
+    
+    private Estado estadoActual;
+    private Pedido pedidoActual;
+    private final ProcesadorPagos procesadorPagos;
+    
+    public MaquinaExpendedora(ProcesadorPagos procesadorPagos) {
+        this.estadoActual = Estado.ESPERANDO_PEDIDO;
+        this.procesadorPagos = procesadorPagos;
+    }
+    
+    public void iniciarPedido(Hamburguesa hamburguesa) {
+        if (estadoActual == Estado.ESPERANDO_PEDIDO) {
+            // Crear el Pedido con lista vacía de ingredientes
+            this.pedidoActual = new Pedido(hamburguesa, new ArrayList<Ingrediente>());
+            this.estadoActual = Estado.PERSONALIZANDO;
+        }
+    }
+    
+    public void agregarIngrediente(Ingrediente ingrediente) {
+        if (estadoActual == Estado.PERSONALIZANDO && pedidoActual != null) {
+            pedidoActual.agregarIngrediente(ingrediente, 1);
+        }
+    }
+    
+    public boolean procesarPago(String metodoPago) {
+        if (estadoActual == Estado.PERSONALIZANDO && pedidoActual != null) {
+            // Asegurarse de que se pase un double a procesarPago
+            boolean exito = procesadorPagos.procesar(pedidoActual.calcularTotal(), metodoPago);
+            if (exito) {
+                estadoActual = Estado.ENTREGANDO;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public Pedido dispensarPedido() {
+        if (estadoActual == Estado.ENTREGANDO && pedidoActual != null) {
+            estadoActual = Estado.ESPERANDO_PEDIDO;
+            Pedido pedido = pedidoActual;
+            pedidoActual = null;
+            return pedido;
+        }
+        return null;
+    }
+    
+    public Estado getEstadoActual() {
+        return estadoActual;
+    }
+}
+
+
+package burgervend.models.ingredientes;
+
+public class Carne extends Ingrediente {
+
+    // Constructor
+    public Carne(String nombre, double precio, String tipo) {
+        super(nombre, precio, tipo);  // Llamada al constructor de la clase base
+    }
+
+    @Override
+    public String getDescripcion() {
+        return "Carne: " + getNombre();
+    }
+
+    @Override
+    public double getPrecio() {
+        return super.precio;  // Usar el precio de la clase base
+    }
+
+    @Override
+    public String getTipo() {
+        return "Carne";  // Tipo es fijo como "Carne"
+    }
+
+    @Override
+    public String toString() {
+        return "Carne: " + getNombre() + ", Precio: " + getPrecio();
+    }
+}
+
+package burgervend.models.ingredientes;
+
+public abstract class Ingrediente {
+    protected String nombre;
+    protected double precio;
+    protected String tipo;
+
+    // Constructor
+    public Ingrediente(String nombre, double precio, String tipo) {
+        this.nombre = nombre;
+        this.precio = precio;
+        this.tipo = tipo;
+    }
+
+    // Métodos abstractos
+    public abstract String getDescripcion();
+    public abstract double getPrecio();
+    public abstract String getTipo();
+    
+    // Método getter para el nombre
+    public String getNombre() {
+        return nombre;
+    }
+
+    @Override
+    public String toString() {
+        return "Ingrediente: " + nombre + ", Precio: " + precio;
+    }
+}
+
+package burgervend.models.ingredientes;
+
+public class IngredienteConcretoA extends Ingrediente {
+    public IngredienteConcretoA() {
+        super("Ingrediente A", 1.0, "Tipo A");  // Pass 'tipo' to the super class constructor
+    }
+
+    @Override
+    public String getDescripcion() {
+        return "Ingrediente A: " + nombre;
+    }
+
+    @Override
+    public double getPrecio() {
+        return precio;
+    }
+
+    @Override
+    public String getTipo() {
+        return "Tipo A"; // Provide the implementation for getTipo()
+    }
+}
+
+package burgervend.models.ingredientes;
+
+public class IngredienteConcretoB extends Ingrediente {
+    public IngredienteConcretoB() {
+        super("Ingrediente B", 1.5, "Tipo B");  // Pass 'tipo' to the super class constructor
+    }
+
+    @Override
+    public String getDescripcion() {
+        return "Ingrediente B: " + nombre;
+    }
+
+    @Override
+    public double getPrecio() {
+        return precio;
+    }
+
+    @Override
+    public String getTipo() {
+        return "Tipo B"; // Provide the implementation for getTipo()
+    }
+}
+
+package burgervend.models.ingredientes;
+
+public class Queso extends Ingrediente {
+
+    // Constructor
+    public Queso(String nombre, double precio, String tipo) {
+        super(nombre, precio, tipo);
+    }
+
+    @Override
+    public String getDescripcion() {
+        return "Queso: " + getNombre();
+    }
+
+    @Override
+    public double getPrecio() {
+        return super.precio;  // Usar el precio de la clase base
+    }
+
+    @Override
+    public String getTipo() {
+        return "Queso";  // Tipo es fijo como "Queso"
+    }
+
+    @Override
+    public String toString() {
+        return "Queso: " + getNombre() + ", Precio: " + getPrecio();
+    }
+}
+
+package burgervend.models.ingredientes;
+
+public class Salsa extends Ingrediente {
+
+    // Constructor
+    public Salsa(String nombre, double precio, String tipo) {
+        super(nombre, precio, tipo);
+    }
+
+    @Override
+    public String getDescripcion() {
+        return "Salsa: " + getNombre();
+    }
+
+    @Override
+    public double getPrecio() {
+        return super.precio;  // Usar el precio de la clase base
+    }
+
+    @Override
+    public String getTipo() {
+        return "Salsa";  // Tipo es fijo como "Salsa"
+    }
+
+    @Override
+    public String toString() {
+        return "Salsa: " + getNombre() + ", Precio: " + getPrecio();
+    }
+}
+
+package burgervend.models.ingredientes;
+
+public class Vegetal extends Ingrediente {
+
+    // Constructor
+    public Vegetal(String nombre, double precio, String tipo) {
+        super(nombre, precio, tipo);
+    }
+
+    @Override
+    public String getDescripcion() {
+        return "Vegetal: " + getNombre();
+    }
+
+    @Override
+    public double getPrecio() {
+        return super.precio;  // Usar el precio de la clase base
+    }
+
+    @Override
+    public String getTipo() {
+        return "Vegetal";  // Tipo es fijo como "Vegetal"
+    }
+
+    @Override
+    public String toString() {
+        return "Vegetal: " + getNombre() + ", Precio: " + getPrecio();
+    }
+}
+
+
+hamburguesas.json
+[
+    {
+        "nombre": "Clasica",
+        "precioBase": 100.50,
+        "ingredientesBase": ["Pan", "Carne Res", "Lechuga","Tomate", "Queso"],
+        "Salsa": "Ketchup"
+    },
+    {
+        "nombre": "doble",
+        "precioBase": 130.00,
+        "ingredientesBase": ["Pan Ajonjolí", "Doble Carne Res","Cebolla", "Queso Cheddar"],
+        "Salsa": "Mayonesa"
+    },
+    {
+        "nombre": "Vegetariana",
+        "precioBase": 140.00,
+        "ingredientesBase": ["Pan Integral","Carne Soya","Lechuga", "Tomate", "Cebolla", "Champiñones"],
+        "Salsa": "Mostaza"
+    },
+    {
+        "nombre": "BBQ",
+        "precioBase": 115.00,
+        "ingredientesBase": ["Pan Brioche", "Carne Res Ahumada", "Tocino","Cebolla Caramelizada", "Queso Gouda"],
+        "Salsa": "BBQ"
+    }
+]
+
+ingredientes.json
+[
+    {"tipo": "carne", "nombre": "res", "precio": 30.5},
+    {"tipo": "carne", "nombre": "pollo", "precio":28.0},
+    {"tipo": "queso", "nombre": "cheddar", "precio": 10.5},
+    {"tipo": "queso", "nombre": "suizo", "precio": 10.8},
+    {"tipo": "vegetal", "nombre": "lechuga", "precio": 8.5},
+    {"tipo": "vegetal", "nombre": "tomate", "precio": 8.7},
+    {"tipo": "salsa", "nombre": "bbq", "precio": 20.8},
+    {"tipo": "salsa", "nombre": "mayonesa", "precio": 15.5}
+]
+
+metodos_pago.json
+["Efectivo", "Tarjeta de Crédito", "Tarjeta de Débito"]
+
+
+
+
+
+
+
+
+
+
+
+
