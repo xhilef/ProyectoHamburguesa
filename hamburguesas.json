@@ -1,0 +1,27 @@
+[
+    {
+        "nombre": "Clasica",
+        "precioBase": 100.50,
+        "ingredientesBase": ["Pan", "Carne Res", "Lechuga","Tomate", "Queso"],
+        "Salsa": "Ketchup"
+    },
+    {
+        "nombre": "doble",
+        "precioBase": 130.00,
+        "ingredientesBase": ["Pan Ajonjolí", "Doble Carne Res","Cebolla", "Queso Cheddar"],
+        "Salsa": "Mayonesa"
+    },
+    {
+        "nombre": "Vegetariana",
+        "precioBase": 140.00,
+        "ingredientesBase": ["Pan Integral","Carne Soya","Lechuga", "Tomate", "Cebolla", "Champiñones"],
+        "Salsa": "Mostaza"
+    },
+    {
+        "nombre": "BBQ",
+        "precioBase": 115.00,
+        "ingredientesBase": ["Pan Brioche", "Carne Res Ahumada", "Tocino","Cebolla Caramelizada", "Queso Gouda"],
+        "Salsa": "BBQ"
+    }
+]
+

@@ -1,0 +1,10 @@
+[
+    {"tipo": "carne", "nombre": "res", "precio": 30.5},
+    {"tipo": "carne", "nombre": "pollo", "precio":28.0},
+    {"tipo": "queso", "nombre": "cheddar", "precio": 10.5},
+    {"tipo": "queso", "nombre": "suizo", "precio": 10.8},
+    {"tipo": "vegetal", "nombre": "lechuga", "precio": 8.5},
+    {"tipo": "vegetal", "nombre": "tomate", "precio": 8.7},
+    {"tipo": "salsa", "nombre": "bbq", "precio": 20.8},
+    {"tipo": "salsa", "nombre": "mayonesa", "precio": 15.5}
+]
