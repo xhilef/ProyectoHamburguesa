@@ -1,0 +1,98 @@
+/* Estilo de los botones de ingredientes */
+.ingredient-button {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 5px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+}
+
+.ingredient-button:hover {
+    -fx-background-color: #d6eaf8;
+}
+
+/* Estilo de las tarjetas de hamburguesas */
+.burger-card {
+    -fx-background-color: white;
+    -fx-border-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+    -fx-padding: 15px;
+}
+
+/* Estilo de los métodos de pago */
+.payment-method {
+    -fx-background-color: #06d445;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 8px;
+    -fx-padding: 15px;
+}
+
+.payment-method:hover {
+    -fx-background-color: #45a049;
+    -fx-border-color: #3e8e41;
+}
+
+/* Estilo del panel de confirmación */
+.confirmation-panel {
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-padding: 20px;
+    -fx-background-radius: 10px;
+}
+
+/* Estilo del botón de pago */
+.pay-button {
+    -fx-background-color: #52be80;
+    -fx-text-fill: white;
+    -fx-border-radius: 5px;
+    -fx-padding: 10px 20px;
+    -fx-font-weight: bold;
+}
+
+.pay-button:hover {
+    -fx-background-color: #45a049;
+}
+
+/* Estilo del título de sección */
+.section-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Estilo de la etiqueta de cantidad */
+.amount-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #1e8449;
+    -fx-font-weight: bold;
+}
+
+/* Reemplaza todas las definiciones de image-view por esta */
+.image-container {
+    -fx-border-color: #d35400; /* Naranja para mejor debug */
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-color: #f9f9f9;
+    -fx-padding: 10px;
+}
+
+.image-view {
+    -fx-fit-width: 300px;
+    -fx-fit-height: 300px;
+    -fx-preserve-ratio: true;
+    -fx-smooth: true;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+.list-cell {
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #d6eaf8;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}

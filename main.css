@@ -1,0 +1,90 @@
+
+/* la raíz de la aplicación */
+.root {
+    -fx-background-color: #c80a0a; 
+    -fx-font-family: 'Arial';
+    -fx-padding: 20;
+    -fx-min-width: 400px;
+    -fx-min-height: 300px;
+}
+
+/* para títulos generales */
+.title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #07c036;
+}
+
+/* base para botones */
+.button {
+    -fx-background-color:  #f0f40a ;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+/* para botones principales */
+.main-button {
+    -fx-font-size: 16px;
+    -fx-padding: 10 20;
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/*  para las imágenes */
+.image-view {
+    -fx-alignment: center;
+}
+
+/*  para la ListView rosadito*/
+.list-view {
+    -fx-background-color: #F08080;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 5px;
+}
+
+/* para celdas de la ListView */
+.list-cell {
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #d6eaf8;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+/* para titulos */
+.label {
+    -fx-text-fill:  #1db813;
+}
+
+/* para campos de texto */
+.text-field {
+    -fx-background-color:  #b8137a ;
+    -fx-border-radius: 5px;
+    -fx-padding: 10px;
+    -fx-border-color: #bdc3c7;
+}
+
+/* para los RadioButton */
+.radio-button {
+    -fx-text-fill: #2c3e50;
+}
+.image-view {
+    -fx-border-color: red;
+    -fx-border-width: 2px;
+}
+.image-view {
+    -fx-fit-width: 30px;
+    -fx-fit-height: 30px;
+    -fx-preserve-ratio: true;
+    -fx-smooth: true;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
