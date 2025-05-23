@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="burgervend.controllers.PaymentController"
+      spacing="20"
+      alignment="TOP_CENTER"
+      prefWidth="400" prefHeight="500"
+      style="-fx-background-color: #f93700;"
+      styleClass="payment-container">
+
+
+    <!-- Título -->
+    <Label text="MÉTODO DE PAGO" styleClass="section-title"/>
+
+    <!-- Contenedor dinámico de métodos de pago -->
+    <VBox fx:id="paymentMethodsContainer" spacing="10" />
+
+    <!-- Campos de tarjeta (visibilidad controlada desde el controlador) -->
+    <HBox spacing="10" fx:id="tarjetaBox" visible="false" alignment="CENTER_LEFT">
+        <Label text="Número de Tarjeta:"/>
+        <TextField fx:id="txtNumeroTarjeta" promptText="Ingrese número de tarjeta"/>
+    </HBox>
+
+    <HBox spacing="40" fx:id="cvvBox" visible="false" alignment="CENTER_LEFT">
+        <Label text="CVV:"/>
+        <TextField fx:id="txtCvv" promptText="Ingrese CVV"/>
+    </HBox>
+
+    <!-- Monto total -->
+    <Label fx:id="lblAmount" styleClass="amount-label"/>
+
+    <!-- Resumen del pedido -->
+    <Label fx:id="lblResumen" wrapText="true" />
+
+    <!-- Botón de pagar -->
+    <Button text="PAGAR" onAction="#onPagarClick" styleClass="pay-button"/>
+</VBox>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox stylesheets="@/burgervend/css/main.css" xmlns="http://javafx.com/javafx/8.0.202" xmlns:fx="http://javafx.com/fxml/1" fx:controller="burgervend.controllers.SelectionController">
+
+    <Label styleClass="title" text="SELECCIONA TU HAMBURGUESA" textFill="#008000" />
+    
+    <ListView fx:id="listHamburguesas">
+        
+    </ListView>
+
+    
+    <Button fx:id="btnStart" onAction="#onPersonalizarClick" styleClass="main-button" text="PERSONALIZAR" />
+</VBox>

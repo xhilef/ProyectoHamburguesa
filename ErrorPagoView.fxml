@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="burgervend.controllers.ErrorPagoController">
+    <children>
+        <VBox spacing="15.0" alignment="CENTER" AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+            <Label text="¡Error en el pago!" style="-fx-font-size: 24px; -fx-text-fill: red;"/>
+            <Label text="Ocurrió un problema al procesar tu pago. Intenta nuevamente o usa otro método." wrapText="true" maxWidth="400"/>
+            <Button text="Volver" onAction="#onVolverClick"/>
+        </VBox>
+    </children>
+</AnchorPane>

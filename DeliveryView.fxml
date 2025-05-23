@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="burgervend.controllers.DeliveryController"
+      spacing="20" alignment="CENTER"
+      minWidth="600" minHeight="400"
+      styleClass="delivery-container">
+
+    <!-- Imagen de éxito -->
+    <ImageView fx:id="imgSuccess" fitWidth="2" fitHeight="100" preserveRatio="true">
+        <image>
+            <Image url="burgervend/imagenes/ui/success.png"/>
+        </image>
+    </ImageView>
+    
+    <!-- Título -->
+    <Label text="¡PEDIDO COMPLETADO!" styleClass="success-title"/>
+    
+    <!-- Detalles del pedido -->
+    <Label fx:id="lblOrderDetails" wrapText="true" styleClass="order-details"/>
+    
+    <!-- Botón de volver al inicio -->
+    <Button text="VOLVER AL INICIO" onAction="#onVolverInicioClick" styleClass="main-button"/>
+</VBox>
